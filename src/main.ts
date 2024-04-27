@@ -1,40 +1,62 @@
-// Importa los datos desde data.ts
-import { clientes, productos, facturas, Cliente, Producto, Factura } from './call';
-
-// Función con callback para obtener una factura y mostrar detalles
-function obtenerFacturaPorId(id: number, callback: (error: Error | null, factura?: Factura) => void): void {
-    const factura = facturas.find(f => f.id === id);
-    if (factura) {
-        callback(null, factura);
-    } else {
-        callback(new Error('Factura no encontrada'));
-    }
+// Definición de interfaces
+interface Cliente {
+  id: number;
+  nombre: string;
 }
 
-// Función para mostrar detalles de una factura usando un callback
-function mostrarDetallesFactura(idFactura: number): void {
-    obtenerFacturaPorId(idFactura, (error, factura) => {
-        if (error) {
-            console.error(error.message);
-            return;
-        }
-        console.log(`Factura ID: ${factura!.id}`);
-        const cliente = clientes.find(c => c.id === factura!.clienteId);
-        console.log(`Cliente: ${cliente!.nombre} (ID: ${cliente!.id})`);
-        console.log('Productos en la factura:');
-        factura!.productos.forEach(p => {
-            console.log(`${p.nombre} - $${p.precio}`);
-        });
-    });
+interface Producto {
+  id: number;
+  nombre: string;
+  precio: number;
 }
 
-// Función para mostrar todas las facturas usando el mismo patrón de callback
+interface Factura {
+  id: number;
+  clienteId: number;
+  productos: Producto[];
+}
+
+// Datos de clientes
+const clientes: Cliente[] = [
+  { id: 1, nombre: "Matt" },
+  { id: 2, nombre: "Luber" },
+  { id: 3, nombre: "Erick" },
+  { id: 4, nombre: "Piloso" },
+  { id: 5, nombre: "Edwin" },
+];
+
+// Datos de productos
+const productos: Producto[] = [
+  { id: 1, nombre: "Telefono", precio: 10 },
+  { id: 2, nombre: "Laptop", precio: 20 },
+  { id: 3, nombre: "Cpu", precio: 30 },
+  { id: 4, nombre: "Monitor", precio: 40 },
+  { id: 5, nombre: "Mouse", precio: 50 },
+];
+
+// Datos de facturas
+const facturas: Factura[] = [
+  { id: 1, clienteId: 1, productos: [productos[0], productos[1]] },
+  { id: 2, clienteId: 2, productos: [productos[2], productos[3]] },
+  { id: 3, clienteId: 3, productos: [productos[4]] },
+  { id: 4, clienteId: 4, productos: [productos[0], productos[2], productos[4]] },
+  { id: 5, clienteId: 5, productos: [productos[1], productos[3]] },
+];
+
+// Función para mostrar todas las facturas
 function mostrarTodasLasFacturas(): void {
-    console.log('Mostrando todas las facturas:');
-    facturas.forEach(factura => {
-        mostrarDetallesFactura(factura.id);
-    });
+  console.log("Mostrando todas las facturas:");
+  facturas.forEach(factura => {
+      console.log(`Factura ID: ${factura.id}, Cliente ID: ${factura.clienteId}`);
+      const cliente = clientes.find(c => c.id === factura.clienteId);
+      console.log(`Cliente: ${cliente ? cliente.nombre : 'Cliente no encontrado'}`);
+      console.log("Productos en la factura:");
+      factura.productos.forEach(p => {
+          console.log(`  Producto: ${p.nombre}, Precio: $${p.precio}`);
+      });
+      console.log("-----");
+  });
 }
 
-// Llamada a la función para mostrar todas las facturas
+// Llamada a la función para mostrar las facturas
 mostrarTodasLasFacturas();
