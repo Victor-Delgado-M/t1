@@ -1,7 +1,10 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.facturas = exports.productos = exports.clientes = void 0;
-const readline = require('readline');
+const readline_1 = __importDefault(require("readline"));
 exports.clientes = [
     { id: 1, nombre: "Matt" },
     { id: 2, nombre: "Luber" },
@@ -34,7 +37,7 @@ function buscarFacturaPorId(id, callback) {
     }
 }
 if (require.main === module) {
-    const rl = readline.createInterface({
+    const rl = readline_1.default.createInterface({
         input: process.stdin,
         output: process.stdout
     });

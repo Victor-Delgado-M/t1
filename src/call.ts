@@ -1,4 +1,4 @@
-const readline = require('readline');
+import readline from 'readline';
 
 export interface Cliente {
     id: number;

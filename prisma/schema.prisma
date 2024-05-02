@@ -1,0 +1,56 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Cliente {
+  id           Int           @id @default(autoincrement())
+  nombre       String
+  facturas     Factura[]
+  transacciones Transaccion[] // Agregar esta línea para reflejar la relación con Transaccion
+}
+
+
+model Producto {
+  id        Int      @id @default(autoincrement())
+  nombre    String
+  precio    Float
+  facturas  FacturaProducto[]
+}
+
+model Factura {
+  id        Int      @id @default(autoincrement())
+  clienteId Int
+  cliente   Cliente  @relation(fields: [clienteId], references: [id])
+  productos FacturaProducto[]
+}
+
+model FacturaProducto {
+  factura   Factura  @relation(fields: [facturaId], references: [id])
+  facturaId Int
+  producto  Producto @relation(fields: [productoId], references: [id])
+  productoId Int
+  cantidad  Int
+  @@id([facturaId, productoId])
+}
+
+
+model Transaccion {
+  id          Int      @id @default(autoincrement())
+  clienteId   Int
+  cliente     Cliente  @relation(fields: [clienteId], references: [id])
+  descripcion String   // Asegúrate de agregar esta línea
+  monto       Float    // Asumo que también quieres almacenar un monto
+}
+
