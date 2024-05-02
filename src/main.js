@@ -1,5 +1,5 @@
 "use strict";
-// Datos de clientes (agregar manualmente)
+// Datos de clientes
 const clientes = [
     { id: 1, nombre: "Matt" },
     { id: 2, nombre: "Luber" },
@@ -7,7 +7,7 @@ const clientes = [
     { id: 4, nombre: "Piloso" },
     { id: 5, nombre: "Edwin" },
 ];
-// Datos de productos (agregar manualmente)
+// Datos de productos
 const productos = [
     { id: 1, nombre: "Telefono", precio: 10 },
     { id: 2, nombre: "Laptop", precio: 20 },
@@ -15,7 +15,7 @@ const productos = [
     { id: 4, nombre: "Monitor", precio: 40 },
     { id: 5, nombre: "Mouse", precio: 50 },
 ];
-// Datos de facturas (agregar manualmente)
+// Datos de facturas
 const facturas = [
     { id: 1, clienteId: 1, productos: [productos[0], productos[1]] },
     { id: 2, clienteId: 2, productos: [productos[2], productos[3]] },
@@ -39,20 +39,3 @@ function mostrarTodasLasFacturas() {
 }
 // Llamada a la función para mostrar las facturas
 mostrarTodasLasFacturas();
-// Función para agregar 10 transacciones
-function agregarTransacciones() {
-    const transacciones = [];
-    for (let i = 1; i <= 10; i++) {
-        const nuevaTransaccion = {
-            id: i,
-            descripcion: `Transacción ${i}`,
-            monto: Math.random() * 1000, // Monto aleatorio
-        };
-        transacciones.push(nuevaTransaccion);
-    }
-    return transacciones;
-}
-// Llamada a la función para agregar transacciones y mostrarlas
-const nuevasTransacciones = agregarTransacciones();
-console.log("Transacciones agregadas:");
-console.log(nuevasTransacciones);
