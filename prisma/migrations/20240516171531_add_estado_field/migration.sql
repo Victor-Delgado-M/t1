@@ -1,20 +1,23 @@
 -- CreateTable
 CREATE TABLE "Cliente" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    "nombre" TEXT NOT NULL
+    "nombre" TEXT NOT NULL,
+    "estado" TEXT NOT NULL DEFAULT 'Activo'
 );
 
 -- CreateTable
 CREATE TABLE "Producto" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     "nombre" TEXT NOT NULL,
-    "precio" REAL NOT NULL
+    "precio" REAL NOT NULL,
+    "estado" TEXT NOT NULL DEFAULT 'Activo'
 );
 
 -- CreateTable
 CREATE TABLE "Factura" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     "clienteId" INTEGER NOT NULL,
+    "estado" TEXT NOT NULL DEFAULT 'Activo',
     CONSTRAINT "Factura_clienteId_fkey" FOREIGN KEY ("clienteId") REFERENCES "Cliente" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
@@ -35,5 +38,6 @@ CREATE TABLE "Transaccion" (
     "clienteId" INTEGER NOT NULL,
     "descripcion" TEXT NOT NULL,
     "monto" REAL NOT NULL,
+    "estado" TEXT NOT NULL DEFAULT 'Activo',
     CONSTRAINT "Transaccion_clienteId_fkey" FOREIGN KEY ("clienteId") REFERENCES "Cliente" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );

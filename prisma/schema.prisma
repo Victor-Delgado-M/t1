@@ -19,6 +19,7 @@ model Cliente {
   nombre       String
   facturas     Factura[]
   transacciones Transaccion[] // Agregar esta línea para reflejar la relación con Transaccion
+  estado       String        @default("Activo")
 }
 
 
@@ -27,6 +28,7 @@ model Producto {
   nombre    String
   precio    Float
   facturas  FacturaProducto[]
+  estado       String        @default("Activo")
 }
 
 model Factura {
@@ -34,6 +36,7 @@ model Factura {
   clienteId Int
   cliente   Cliente  @relation(fields: [clienteId], references: [id])
   productos FacturaProducto[]
+  estado       String        @default("Activo")
 }
 
 model FacturaProducto {
@@ -52,5 +55,6 @@ model Transaccion {
   cliente     Cliente  @relation(fields: [clienteId], references: [id])
   descripcion String   // Asegúrate de agregar esta línea
   monto       Float    // Asumo que también quieres almacenar un monto
+  estado       String        @default("Activo")
 }
 
