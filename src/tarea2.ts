@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import readline from 'readline';
+import * as readline from 'readline';
 
 const prisma = new PrismaClient();
 const rl = readline.createInterface({
@@ -7,100 +7,130 @@ const rl = readline.createInterface({
     output: process.stdout
 });
 
-async function agregarCliente() {
-    rl.question('Ingrese el nombre del cliente: ', async (nombre) => {
-        const cliente = await prisma.cliente.create({
-            data: { nombre }
-        });
-        console.log('Cliente creado:', cliente);
-        mostrarMenu();  // Vuelve al menú principal después de la operación
-    });
+// Insertar inversionistas y conceptos de inversión para asegurar que existen
+async function inicializarDatos() {
+    const inversionistasData = [
+        { nombre: 'Luber', identificacion: '1234567890' },
+        { nombre: 'Matt', identificacion: '0987654321' },
+        { nombre: 'Erick', identificacion: '1111111111' },
+        { nombre: 'Edwin', identificacion: '2222222222' },
+        { nombre: 'Piloso', identificacion: '3333333333' }
+    ];
+
+    const conceptosInversionData = [
+        { concepto: 'Acciones', detalle: 'Compra de acciones en bolsa' },
+        { concepto: 'Bienes Raíces', detalle: 'Compra de propiedades inmobiliarias' },
+        { concepto: 'Bonos', detalle: 'Compra de bonos gubernamentales' },
+        { concepto: 'Criptomonedas', detalle: 'Compra de criptomonedas' },
+        { concepto: 'Fondos Mutuos', detalle: 'Inversión en fondos mutuos' }
+    ];
+
+    await prisma.inversionista.createMany({ data: inversionistasData });
+    await prisma.conceptoInversion.createMany({ data: conceptosInversionData });
+    console.log('Datos inicializados.');
 }
 
-async function agregarTransacciones() {
-    for (let i = 0; i < 10; i++) {
-        console.log(`Transacción ${i + 1}:`);
-        const clienteId = await new Promise<number>(resolve => {
-            rl.question('Ingrese el ID del cliente: ', (id) => resolve(parseInt(id)));
-        });
-        const descripcion = await new Promise<string>(resolve => {
-            rl.question('Ingrese la descripción de la transacción: ', resolve);
-        });
-        const monto = await new Promise<number>(resolve => {
-            rl.question('Ingrese el monto de la transacción: ', (monto) => resolve(parseFloat(monto)));
-        });
-        const transaccion = await prisma.transaccion.create({
-            data: {
-                clienteId,
-                descripcion,
-                monto
+// Función LLENAR para insertar 10 transacciones
+async function llenarTransacciones() {
+    try {
+        for (let i = 0; i < 10; i++) {
+            const inversionistaId = Math.floor(Math.random() * 5) + 1;
+            const conceptoInversionId = Math.floor(Math.random() * 5) + 1;
+            const monto = Math.floor(Math.random() * 10000) + 1;
+            const fecha = new Date();
+
+            await prisma.inversionRealizada.create({
+                data: {
+                    inversionistaId,
+                    conceptoInversionId,
+                    monto,
+                    fecha
+                }
+            });
+        }
+        console.log('10 transacciones insertadas.');
+    } catch (error) {
+        console.error('Error al insertar transacciones:', error);
+    }
+}
+
+// Función para buscar una transacción por ID
+async function buscarTransaccion(id: number) {
+    try {
+        const transaccion = await prisma.inversionRealizada.findUnique({
+            where: { id },
+            include: {
+                inversionista: true,
+                conceptoInversion: true
             }
         });
-        console.log('Transacción creada:', transaccion);
-    }
-    mostrarMenu();
-}
 
-async function buscarTransaccion() {
-    rl.question('Ingrese el ID de la transacción: ', async (id) => {
-        const transaccion = await prisma.transaccion.findUnique({
-            where: { id: parseInt(id) },
-            include: { cliente: true }
-        });
         if (transaccion) {
             console.log('Transacción encontrada:', transaccion);
         } else {
             console.log('Transacción no encontrada.');
         }
-        mostrarMenu();
-    });
+    } catch (error) {
+        console.error('Error al buscar transacción:', error);
+    }
 }
 
+// Función para consultar todas las transacciones y mostrar atributos principales
 async function consultarTransacciones() {
-    const transacciones = await prisma.transaccion.findMany({
-        include: {
-            cliente: true
-        }
-    });
-    console.log('Todas las transacciones:');
-    transacciones.forEach(t => {
-        console.log(`ID: ${t.id}, Cliente: ${t.cliente.nombre}, Descripción: ${t.descripcion}, Monto: ${t.monto}`);
-    });
-    mostrarMenu();
+    try {
+        const transacciones = await prisma.inversionRealizada.findMany({
+            include: {
+                inversionista: {
+                    select: { nombre: true, identificacion: true }
+                },
+                conceptoInversion: {
+                    select: { concepto: true, detalle: true }
+                }
+            }
+        });
+
+        console.log('Todas las transacciones:', transacciones);
+    } catch (error) {
+        console.error('Error al consultar transacciones:', error);
+    }
 }
 
+// Menú de opciones
 function mostrarMenu() {
-    console.log("\nSeleccione una opción:");
-    console.log("1: Agregar Cliente");
-    console.log("2: Agregar 10 Transacciones");
-    console.log("3: Buscar Transacción por ID");
-    console.log("4: Consultar Todas las Transacciones");
-    console.log("5: Salir");
-    rl.question('Opción: ', (opcion) => {
-        switch (opcion) {
+    const menu = `
+Elija una opción:
+1. Inicializar datos
+2. Llenar transacciones
+3. Buscar transacción por ID
+4. Consultar todas las transacciones
+5. Salir
+
+Ingrese el número de la opción: `;
+
+    rl.question(menu, (option) => {
+        switch (option) {
             case '1':
-                agregarCliente();
+                inicializarDatos().then(() => mostrarMenu());
                 break;
             case '2':
-                agregarTransacciones();
+                llenarTransacciones().then(() => mostrarMenu());
                 break;
             case '3':
-                buscarTransaccion();
+                rl.question('Ingrese el ID de la transacción: ', (id) => {
+                    buscarTransaccion(parseInt(id)).then(() => mostrarMenu());
+                });
                 break;
             case '4':
-                consultarTransacciones();
+                consultarTransacciones().then(() => mostrarMenu());
                 break;
             case '5':
-                console.log("Saliendo...");
                 rl.close();
-                prisma.$disconnect();
                 break;
             default:
-                console.log("Opción no válida.");
+                console.log('Opción no válida');
                 mostrarMenu();
-                break;
         }
     });
 }
 
-mostrarMenu();  // Iniciar el programa mostrando el menú
+mostrarMenu();

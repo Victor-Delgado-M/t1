@@ -1,27 +1,12 @@
-import express, { Application, Request, Response } from 'express';
-import { json } from 'body-parser';
-import { PrismaClient } from '@prisma/client';
-import clienteRoutes from './routes/clienteRoutes';
-import productoRoutes from './routes/productoRoutes';
-import facturaRoutes from './routes/facturaRoutes';
+import express from 'express';
+import router from './routes';
 
-const app: Application = express();
-const prisma = new PrismaClient();
+const app = express();
+const port = process.env.PORT || 3000;
 
-app.use(json());
+app.use(express.json());
+app.use('/api', router);
 
-// Rutas
-app.use('/api/clientes', clienteRoutes);
-app.use('/api/productos', productoRoutes);
-app.use('/api/facturas', facturaRoutes);
-
-// Middleware de manejo de errores
-app.use((err: any, req: Request, res: Response, next: any) => {
-  console.error(err.stack);
-  res.status(500).send('Algo salió mal!');
-});
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en el puerto ${PORT}`);
+app.listen(port, () => {
+    console.log(`Servidor corriendo en http://localhost:${port}`);
 });

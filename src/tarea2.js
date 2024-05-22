@@ -1,4 +1,27 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -8,59 +31,71 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const client_1 = require("@prisma/client");
-const readline_1 = __importDefault(require("readline"));
+const readline = __importStar(require("readline"));
 const prisma = new client_1.PrismaClient();
-const rl = readline_1.default.createInterface({
+const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
 });
-function agregarCliente() {
+// Insertar inversionistas y conceptos de inversión para asegurar que existen
+function inicializarDatos() {
     return __awaiter(this, void 0, void 0, function* () {
-        rl.question('Ingrese el nombre del cliente: ', (nombre) => __awaiter(this, void 0, void 0, function* () {
-            const cliente = yield prisma.cliente.create({
-                data: { nombre }
-            });
-            console.log('Cliente creado:', cliente);
-            mostrarMenu(); // Vuelve al menú principal después de la operación
-        }));
+        const inversionistasData = [
+            { nombre: 'Luber', identificacion: '1234567890' },
+            { nombre: 'Matt', identificacion: '0987654321' },
+            { nombre: 'Erick', identificacion: '1111111111' },
+            { nombre: 'Edwin', identificacion: '2222222222' },
+            { nombre: 'Piloso', identificacion: '3333333333' }
+        ];
+        const conceptosInversionData = [
+            { concepto: 'Acciones', detalle: 'Compra de acciones en bolsa' },
+            { concepto: 'Bienes Raíces', detalle: 'Compra de propiedades inmobiliarias' },
+            { concepto: 'Bonos', detalle: 'Compra de bonos gubernamentales' },
+            { concepto: 'Criptomonedas', detalle: 'Compra de criptomonedas' },
+            { concepto: 'Fondos Mutuos', detalle: 'Inversión en fondos mutuos' }
+        ];
+        yield prisma.inversionista.createMany({ data: inversionistasData });
+        yield prisma.conceptoInversion.createMany({ data: conceptosInversionData });
+        console.log('Datos inicializados.');
     });
 }
-function agregarTransacciones() {
+// Función LLENAR para insertar 10 transacciones
+function llenarTransacciones() {
     return __awaiter(this, void 0, void 0, function* () {
-        for (let i = 0; i < 10; i++) {
-            console.log(`Transacción ${i + 1}:`);
-            const clienteId = yield new Promise(resolve => {
-                rl.question('Ingrese el ID del cliente: ', (id) => resolve(parseInt(id)));
-            });
-            const descripcion = yield new Promise(resolve => {
-                rl.question('Ingrese la descripción de la transacción: ', resolve);
-            });
-            const monto = yield new Promise(resolve => {
-                rl.question('Ingrese el monto de la transacción: ', (monto) => resolve(parseFloat(monto)));
-            });
-            const transaccion = yield prisma.transaccion.create({
-                data: {
-                    clienteId,
-                    descripcion,
-                    monto
-                }
-            });
-            console.log('Transacción creada:', transaccion);
+        try {
+            for (let i = 0; i < 10; i++) {
+                const inversionistaId = Math.floor(Math.random() * 5) + 1;
+                const conceptoInversionId = Math.floor(Math.random() * 5) + 1;
+                const monto = Math.floor(Math.random() * 10000) + 1;
+                const fecha = new Date();
+                yield prisma.inversionRealizada.create({
+                    data: {
+                        inversionistaId,
+                        conceptoInversionId,
+                        monto,
+                        fecha
+                    }
+                });
+            }
+            console.log('10 transacciones insertadas.');
         }
-        mostrarMenu();
+        catch (error) {
+            console.error('Error al insertar transacciones:', error);
+        }
     });
 }
-function buscarTransaccion() {
+// Función para buscar una transacción por ID
+function buscarTransaccion(id) {
     return __awaiter(this, void 0, void 0, function* () {
-        rl.question('Ingrese el ID de la transacción: ', (id) => __awaiter(this, void 0, void 0, function* () {
-            const transaccion = yield prisma.transaccion.findUnique({
-                where: { id: parseInt(id) },
-                include: { cliente: true }
+        try {
+            const transaccion = yield prisma.inversionRealizada.findUnique({
+                where: { id },
+                include: {
+                    inversionista: true,
+                    conceptoInversion: true
+                }
             });
             if (transaccion) {
                 console.log('Transacción encontrada:', transaccion);
@@ -68,55 +103,63 @@ function buscarTransaccion() {
             else {
                 console.log('Transacción no encontrada.');
             }
-            mostrarMenu();
-        }));
-    });
-}
-function consultarTransacciones() {
-    return __awaiter(this, void 0, void 0, function* () {
-        const transacciones = yield prisma.transaccion.findMany({
-            include: {
-                cliente: true
-            }
-        });
-        console.log('Todas las transacciones:');
-        transacciones.forEach(t => {
-            console.log(`ID: ${t.id}, Cliente: ${t.cliente.nombre}, Descripción: ${t.descripcion}, Monto: ${t.monto}`);
-        });
-        mostrarMenu();
-    });
-}
-function mostrarMenu() {
-    console.log("\nSeleccione una opción:");
-    console.log("1: Agregar Cliente");
-    console.log("2: Agregar 10 Transacciones");
-    console.log("3: Buscar Transacción por ID");
-    console.log("4: Consultar Todas las Transacciones");
-    console.log("5: Salir");
-    rl.question('Opción: ', (opcion) => {
-        switch (opcion) {
-            case '1':
-                agregarCliente();
-                break;
-            case '2':
-                agregarTransacciones();
-                break;
-            case '3':
-                buscarTransaccion();
-                break;
-            case '4':
-                consultarTransacciones();
-                break;
-            case '5':
-                console.log("Saliendo...");
-                rl.close();
-                prisma.$disconnect();
-                break;
-            default:
-                console.log("Opción no válida.");
-                mostrarMenu();
-                break;
+        }
+        catch (error) {
+            console.error('Error al buscar transacción:', error);
         }
     });
 }
-mostrarMenu(); // Iniciar el programa mostrando el menú
+// Función para consultar todas las transacciones y mostrar atributos principales
+function consultarTransacciones() {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const transacciones = yield prisma.inversionRealizada.findMany({
+                include: {
+                    inversionista: {
+                        select: { nombre: true, identificacion: true }
+                    },
+                    conceptoInversion: {
+                        select: { concepto: true, detalle: true }
+                    }
+                }
+            });
+            console.log('Todas las transacciones:', transacciones);
+        }
+        catch (error) {
+            console.error('Error al consultar transacciones:', error);
+        }
+    });
+}
+// Menú de opciones
+function mostrarMenu() {
+    const menu = `
+Elija una opción:
+1. Llenar transacciones
+2. Buscar transacción por ID
+3. Consultar todas las transacciones
+4. Salir
+
+Ingrese el número de la opción: `;
+    rl.question(menu, (option) => {
+        switch (option) {
+            case '1':
+                llenarTransacciones().then(() => mostrarMenu());
+                break;
+            case '2':
+                rl.question('Ingrese el ID de la transacción: ', (id) => {
+                    buscarTransaccion(parseInt(id)).then(() => mostrarMenu());
+                });
+                break;
+            case '3':
+                consultarTransacciones().then(() => mostrarMenu());
+                break;
+            case '4':
+                rl.close();
+                break;
+            default:
+                console.log('Opción no válida');
+                mostrarMenu();
+        }
+    });
+}
+mostrarMenu();
