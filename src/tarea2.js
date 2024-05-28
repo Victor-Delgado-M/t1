@@ -134,26 +134,30 @@ function consultarTransacciones() {
 function mostrarMenu() {
     const menu = `
 Elija una opción:
-1. Llenar transacciones
-2. Buscar transacción por ID
-3. Consultar todas las transacciones
-4. Salir
+1. Inicializar datos
+2. Llenar transacciones
+3. Buscar transacción por ID
+4. Consultar todas las transacciones
+5. Salir
 
 Ingrese el número de la opción: `;
     rl.question(menu, (option) => {
         switch (option) {
             case '1':
-                llenarTransacciones().then(() => mostrarMenu());
+                inicializarDatos().then(() => mostrarMenu());
                 break;
             case '2':
+                llenarTransacciones().then(() => mostrarMenu());
+                break;
+            case '3':
                 rl.question('Ingrese el ID de la transacción: ', (id) => {
                     buscarTransaccion(parseInt(id)).then(() => mostrarMenu());
                 });
                 break;
-            case '3':
+            case '4':
                 consultarTransacciones().then(() => mostrarMenu());
                 break;
-            case '4':
+            case '5':
                 rl.close();
                 break;
             default:

@@ -39,3 +39,16 @@ model InversionRealizada {
   inversionista         Inversionista    @relation(fields: [inversionistaId], references: [id])
   conceptoInversion     ConceptoInversion @relation(fields: [conceptoInversionId], references: [id])
 }
+
+model Entorno {
+  id          Int          @id @default(autoincrement())
+  descripcion String
+  transacciones Transaccion[]
+}
+
+model Transaccion {
+  id          Int      @id @default(autoincrement())
+  descripcion String
+  entornoId   Int
+  entorno     Entorno  @relation(fields: [entornoId], references: [id])
+}
